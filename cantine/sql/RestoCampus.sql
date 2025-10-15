@@ -2,7 +2,7 @@
 -- BASE DE DONNÉES : Projet Cantine
 -- Auteur : [Ton nom]
 -- Date : 2025-10-13
--- Description : Script de création du MLD (Modèle Logique de Données)
+-- Description : Script de création du MLD (Modèle Logique de Données) - Version corrigée
 -- =====================================================
 
 -- Création de la base de données
@@ -10,21 +10,18 @@ CREATE DATABASE IF NOT EXISTS cantine CHARACTER SET utf8mb4 COLLATE utf8mb4_unic
 USE cantine;
 
 -- =====================================================
--- TABLE : UTILISATEUR
+-- TABLE : users
 -- =====================================================
-CREATE TABLE UTILISATEUR (
-    id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL,
-    prenom VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'étudiant') NOT NULL
+CREATE TABLE IF NOT EXISTS users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  login VARCHAR(50) NOT NULL,
+  password VARCHAR(255) NOT NULL -- Augmenté la taille pour les mots de passe hachés
 );
 
 -- =====================================================
 -- TABLE : ARTICLE
 -- =====================================================
-CREATE TABLE ARTICLE (
+CREATE TABLE IF NOT EXISTS ARTICLE (
     id_article INT AUTO_INCREMENT PRIMARY KEY,
     nom_article VARCHAR(100) NOT NULL,
     description TEXT,
@@ -36,7 +33,7 @@ CREATE TABLE ARTICLE (
 -- =====================================================
 -- TABLE : INGREDIENT
 -- =====================================================
-CREATE TABLE INGREDIENT (
+CREATE TABLE IF NOT EXISTS INGREDIENT (
     id_ingredient INT AUTO_INCREMENT PRIMARY KEY,
     nom_ingredient VARCHAR(100) NOT NULL,
     allergene BOOLEAN NOT NULL DEFAULT FALSE,
@@ -46,13 +43,14 @@ CREATE TABLE INGREDIENT (
 -- =====================================================
 -- TABLE : COMMANDE
 -- =====================================================
-CREATE TABLE COMMANDE (
+CREATE TABLE IF NOT EXISTS COMMANDE (
     id_commande INT AUTO_INCREMENT PRIMARY KEY,
     date_commande DATE NOT NULL,
     heure_commande TIME NOT NULL,
     statut ENUM('réservée', 'récupérée', 'annulée') NOT NULL DEFAULT 'réservée',
     id_utilisateur INT NOT NULL,
-    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id_utilisateur)
+    -- CORRECTION : La clé étrangère référence maintenant la table `users` et sa colonne `id`
+    FOREIGN KEY (id_utilisateur) REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
@@ -60,7 +58,7 @@ CREATE TABLE COMMANDE (
 -- =====================================================
 -- TABLE D’ASSOCIATION : CONTENIR
 -- =====================================================
-CREATE TABLE CONTENIR (
+CREATE TABLE IF NOT EXISTS CONTENIR (
     id_commande INT NOT NULL,
     id_article INT NOT NULL,
     quantite_commandee INT NOT NULL CHECK (quantite_commandee > 0),
@@ -76,7 +74,7 @@ CREATE TABLE CONTENIR (
 -- =====================================================
 -- TABLE D’ASSOCIATION : COMPOSER
 -- =====================================================
-CREATE TABLE COMPOSER (
+CREATE TABLE IF NOT EXISTS COMPOSER (
     id_article INT NOT NULL,
     id_ingredient INT NOT NULL,
     quantite_ingredient DECIMAL(6,2) NOT NULL CHECK (quantite_ingredient > 0),
@@ -91,14 +89,14 @@ CREATE TABLE COMPOSER (
 
 
 -- =====================================================
--- VUES OPTIONNELLES OU DONNÉES DE TEST
+-- DONNÉES DE TEST
 -- =====================================================
 
 -- Exemple d’insertion d’un admin et d’un étudiant
-INSERT INTO UTILISATEUR (nom, prenom, email, mot_de_passe, role)
-VALUES 
-('Dupont', 'Admin', 'admin@cantine.fr', 'admin123', 'admin'),
-('Martin', 'Alice', 'alice@etu.fr', 'etu123', 'étudiant');
+-- Les ID seront 1 pour 'admin' et 2 pour 'etudiant' grâce à l'AUTO_INCREMENT
+INSERT INTO users (login, password) VALUES
+('admin', 'admin123'),
+('etudiant', 'azerty');
 
 -- Exemple d’articles
 INSERT INTO ARTICLE (nom_article, description, prix, quantite_disponible, quantite_max)
@@ -117,15 +115,15 @@ VALUES
 -- Lier ingrédients aux articles
 INSERT INTO COMPOSER (id_article, id_ingredient, quantite_ingredient)
 VALUES
-(1, 1, 0.05), -- Sandwich Jambon - Jambon
-(1, 2, 0.01), -- Sandwich Jambon - Beurre
-(2, 3, 0.08), -- Salade César - Poulet
-(2, 4, 0.02); -- Salade César - Parmesan
+(1, 1, 0.05), -- Sandwich Jambon (id=1) -> Jambon (id=1)
+(1, 2, 0.01), -- Sandwich Jambon (id=1) -> Beurre (id=2)
+(2, 3, 0.08), -- Salade César (id=2) -> Poulet (id=3)
+(2, 4, 0.02); -- Salade César (id=2) -> Parmesan (id=4)
 
--- Exemple de commande
+-- Exemple de commande pour l'utilisateur 'etudiant' (id=2)
 INSERT INTO COMMANDE (date_commande, heure_commande, statut, id_utilisateur)
 VALUES (CURDATE(), CURTIME(), 'réservée', 2);
 
--- Exemple de contenu de commande
+-- Exemple de contenu de commande (la commande avec id=1 contient 2 sandwichs)
 INSERT INTO CONTENIR (id_commande, id_article, quantite_commandee)
 VALUES (1, 1, 2);
