@@ -8,7 +8,6 @@ class ArticleModel {
         $this->pdo = Db::getInstance()->getConnection();
     }
 
-    // Lister tous les articles avec leurs ingrédients
     public function getAll() {
         $stmt = $this->pdo->query("
             SELECT a.idArticle, a.nom, a.description,
@@ -20,7 +19,6 @@ class ArticleModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer un article par ID
     public function getById($id) {
         $stmt = $this->pdo->prepare("SELECT * FROM article WHERE idArticle = :id");
         $stmt->execute(['id' => $id]);
@@ -33,7 +31,6 @@ class ArticleModel {
         return $article;
     }
 
-    // Ajouter un article + ingrédients
     public function add($nom, $description, $ingredients = []) {
         $stmt = $this->pdo->prepare("INSERT INTO article (nom, description) VALUES (:nom, :description)");
         $stmt->execute(['nom' => $nom, 'description' => $description]);
@@ -45,7 +42,6 @@ class ArticleModel {
         }
     }
 
-    // Modifier un article + ingrédients
     public function update($id, $nom, $description, $ingredients = []) {
         $stmt = $this->pdo->prepare("UPDATE article SET nom = :nom, description = :description WHERE idArticle = :id");
         $stmt->execute(['nom' => $nom, 'description' => $description, 'id' => $id]);
@@ -59,7 +55,6 @@ class ArticleModel {
         }
     }
 
-    // Supprimer un article + ingrédients
     public function delete($id) {
         $stmt1 = $this->pdo->prepare("DELETE FROM ingredient WHERE idArticle = :id");
         $stmt1->execute(['id' => $id]);

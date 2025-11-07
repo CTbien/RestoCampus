@@ -8,13 +8,11 @@ class ArticleDisponibleController {
         $this->model = new ArticleDisponibleModel();
     }
 
-    // Lister toutes les disponibilités
     public function lister() {
         $disponibilites = $this->model->getAll();
         require "views/dispo/list.php";
     }
 
-    // Ajouter une disponibilité
     public function ajouter() {
         $articles = $this->model->getArticles();
         $message = '';
@@ -25,7 +23,6 @@ class ArticleDisponibleController {
             $dateHeureFin = $_POST['dateHeureFin'] ?? null;
             $quantiteMax = $_POST['quantiteMax'] ?? null;
 
-            // Validation simple
             if (!$idArticle || !$dateHeureDebut || !$dateHeureFin || !$quantiteMax) {
                 $message = "Tous les champs sont obligatoires.";
             } elseif (strtotime($dateHeureFin) <= strtotime($dateHeureDebut)) {
@@ -40,7 +37,6 @@ class ArticleDisponibleController {
         require "views/dispo/add.php";
     }
 
-    // Modifier une disponibilité
     public function modifier() {
         $idDispo = $_GET['id'] ?? null;
         if (!$idDispo) exit("ID manquant");
@@ -66,10 +62,9 @@ class ArticleDisponibleController {
             }
         }
 
-        require "views/dispo/add.php"; // On réutilise le même formulaire que pour l'ajout
+        require "views/dispo/add.php";
     }
 
-    // Supprimer une disponibilité
     public function supprimer() {
         $idDispo = $_GET['id'] ?? null;
         if ($idDispo) {

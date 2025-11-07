@@ -1,0 +1,32 @@
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+footer {
+  font-size: 0.9em;
+}
+.card {
+  border-radius: 12px;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+select, input {
+  border-radius: 8px !important;
+}
