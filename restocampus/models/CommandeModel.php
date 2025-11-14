@@ -9,19 +9,29 @@ class CommandeModel {
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public function isCreneauOuvert(int $idDispo) {
-        $stmt = $this->pdo->prepare("
-            SELECT idDispo, idArticle, dateHeureDebut, dateHeureFin, quantiteMax
-            FROM articleDisponible
-            WHERE idDispo = :idDispo
-              AND dateHeureDebut <= NOW()
-              AND dateHeureFin >= NOW()
-            LIMIT 1
-        ");
-        $stmt->execute(['idDispo' => $idDispo]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: false;
+    public function isCreneauOuvert($idDispo)
+{
+    $sql = "SELECT dateHeureDebut, dateHeureFin 
+            FROM articleDisponible 
+            WHERE idDispo = ?";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute([$idDispo]);
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$data) {
+        return false;
     }
+
+    // Serveur en UTC → on ajuste à UTC+1
+    $now   = time() + 3600; 
+    $start = strtotime($data['dateHeureDebut']);
+    $end   = strtotime($data['dateHeureFin']);
+
+    return ($now >= $start && $now <= $end);
+}
+
+
+
 
     public function quantiteDisponible(int $idDispo): int {
         $stmt = $this->pdo->prepare("SELECT quantiteMax FROM articleDisponible WHERE idDispo = :idDispo");
@@ -121,7 +131,9 @@ class CommandeModel {
         JOIN article a ON a.idArticle = ad.idArticle
         LEFT JOIN commande c 
             ON c.idDispo = ad.idDispo 
-            AND c.statut != 'annulee'
+            AND c.statut != 'annulée'
+        WHERE ad.dateHeureDebut <= NOW()
+          AND ad.dateHeureFin >= NOW()
         GROUP BY ad.idDispo
         ORDER BY ad.dateHeureDebut ASC
     ";
@@ -129,6 +141,7 @@ class CommandeModel {
     $stmt = $this->pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 
     public function getMesCommandes(int $idUtilisateur): array {
