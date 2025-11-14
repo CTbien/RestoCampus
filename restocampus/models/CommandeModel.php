@@ -109,20 +109,27 @@ class CommandeModel {
         }
     }
 
-    public function getDisponibilitesOuvertes(): array {
-        $stmt = $this->pdo->query("
-            SELECT ad.idDispo, a.nom AS article, ad.dateHeureDebut, ad.dateHeureFin, ad.quantiteMax,
-                   (ad.quantiteMax - IFNULL(SUM(CASE WHEN c.statut != 'annulée' THEN c.quantite ELSE 0 END),0)) AS dispoRestante
-            FROM articleDisponible ad
-            JOIN article a ON ad.idArticle = a.idArticle
-            LEFT JOIN commande c ON ad.idDispo = c.idDispo
-            WHERE ad.dateHeureDebut <= NOW() AND ad.dateHeureFin >= NOW()
-            GROUP BY ad.idDispo
-            HAVING dispoRestante > 0
-            ORDER BY ad.dateHeureDebut ASC
-        ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    public function getDisponibilitesOuvertes() {
+    $sql = "
+        SELECT 
+            ad.idDispo,
+            a.nom AS article,
+            ad.dateHeureDebut,
+            ad.dateHeureFin,
+            ad.quantiteMax - COALESCE(SUM(c.quantite), 0) AS dispoRestante
+        FROM articleDisponible ad
+        JOIN article a ON a.idArticle = ad.idArticle
+        LEFT JOIN commande c 
+            ON c.idDispo = ad.idDispo 
+            AND c.statut != 'annulee'
+        GROUP BY ad.idDispo
+        ORDER BY ad.dateHeureDebut ASC
+    ";
+
+    $stmt = $this->pdo->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     public function getMesCommandes(int $idUtilisateur): array {
         $stmt = $this->pdo->prepare("

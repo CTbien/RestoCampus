@@ -1,7 +1,7 @@
 <?php
-include __DIR__ . '/../layout/header.php'; 
+include __DIR__ . '/../layout/header.php';
 ?>
-
+ 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4 mb-0">Articles disponibles à la réservation</h2>
@@ -10,15 +10,15 @@ include __DIR__ . '/../layout/header.php';
               <i class="bi bi-cart-plus"></i> Voir mes commandes
             </a>
             <a href="index.php?action=dashboard" class="btn btn-outline-secondary me-2">
-              <i class="bi bi-house-door"></i> Retour 
+              <i class="bi bi-house-door"></i> Retour
             </a>
         </div>
     </div>
-
+ 
     <?php if (!empty($message)): ?>
         <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
-
+ 
     <?php if (empty($disponibilites)): ?>
         <div class="alert alert-warning">Aucune disponibilité ouverte pour le moment.</div>
     <?php else: ?>
@@ -58,3 +58,4 @@ include __DIR__ . '/../layout/header.php';
         </div>
     <?php endif; ?>
 </div>
+ 
